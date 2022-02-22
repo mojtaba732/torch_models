@@ -17,10 +17,11 @@ class FNNModel(nn.Module):
             hidden_dim = 100
         self.fc2 = nn.Linear(seq_len * embedding_dim, hidden_dim)
         self.fc3 = nn.Linear(hidden_dim, token_num)
+        self.activation = nn.LogSoftmax()
 
     def forward(self, input):
         embedding = self.embedding(input).view(input.shape[0], -1)
         output = self.fc3(F.tanh(self.fc2(embedding)))
         if self.use_direct_connection:
             output += self.direct_connection_fc(embedding)
-        return F.log_softmax(output)
+        return self.activation(output)
