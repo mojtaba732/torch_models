@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class FNNModel(nn.Module):
@@ -21,7 +20,7 @@ class FNNModel(nn.Module):
 
     def forward(self, input):
         embedding = self.embedding(input).view(input.shape[0], -1)
-        output = self.fc3(F.tanh(self.fc2(embedding)))
+        output = self.fc3(self.fc2(embedding).tanh())
         if self.use_direct_connection:
             output += self.direct_connection_fc(embedding)
         return self.activation(output)
