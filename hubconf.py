@@ -1,6 +1,6 @@
-import assignment.fnn_model as FNNModel
 from densenet import DenseNet40
 from dla_simple import SimpleDLA
+from fnn_model import FNNModel
 from lenet import LeNet5
 from lstm import SimpleLSTM
 from m5 import M5, SmallM5
