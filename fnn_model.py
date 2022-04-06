@@ -11,6 +11,7 @@ class FNNModel(nn.Module):
         hidden_dim=None,
         embedding_dim=None,
         use_direct_connection=True,
+        tie_weights=False,
     ):
         super().__init__()
         self.token_num = token_num
@@ -26,8 +27,22 @@ class FNNModel(nn.Module):
 
         if hidden_dim is None:
             hidden_dim = 100
+
         self.fc2 = nn.Linear(seq_len * embedding_dim, hidden_dim)
         self.fc3 = nn.Linear(hidden_dim, token_num)
+        # Optionally tie weights as in:
+        # "Using the Output Embedding to Improve Language Models" (Press & Wolf 2016)
+        # https://arxiv.org/abs/1608.05859
+        # and
+        # "Tying Word Vectors and Word Classifiers: A Loss Framework for Language Modeling" (Inan et al. 2016)
+        # https://arxiv.org/abs/1611.01462
+        if tie_weights:
+            if embedding_dim != hidden_dim:
+                raise ValueError(
+                    "When using the tied flag, embedding_dim must be equal to hidden_dim"
+                )
+            self.fc3.weight = self.embedding.weight
+
         self.activation = nn.LogSoftmax()
 
     def forward(self, input):
