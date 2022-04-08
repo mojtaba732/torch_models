@@ -31,8 +31,8 @@ class PositionalEncoding(Module):
 class TransformerLangModel(Module):
     def __init__(
         self,
-        token_num,
-        seq_len,
+        token_num: int,
+        seq_len: int,
         d_model: int = 512,
     ):
         super().__init__()
@@ -47,7 +47,7 @@ class TransformerLangModel(Module):
         self.linear = Linear(d_model, token_num)
         self.activation = LogSoftmax()
 
-    def forward(self, src: Tensor):
+    def forward(self, src: Tensor) -> Tensor:
         src_embedding = self.positional_encoding(self.embedding(src))
         output = self.transformer_encoder(
             src=src_embedding,
