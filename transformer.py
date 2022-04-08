@@ -54,3 +54,32 @@ class TransformerLangModel(Module):
         )
         output = self.activation(self.linear(output)).view(-1, self.token_num)
         return output
+
+
+class TransformerClassificationModel(Module):
+    def __init__(
+        self,
+        token_num: int,
+        seq_len: int,
+        num_classes: int,
+        d_model: int = 512,
+    ):
+        super().__init__()
+        self.token_num = token_num
+        self.seq_len = seq_len
+        self.embedding = Embedding(token_num, embedding_dim=d_model)
+        self.positional_encoding = PositionalEncoding(d_model=d_model, max_len=seq_len)
+        encoder_layers = TransformerEncoderLayer(
+            d_model=d_model, nhead=8, batch_first=True
+        )
+        self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers=6)
+        self.linear = Linear(d_model, num_classes)
+        self.activation = LogSoftmax()
+
+    def forward(self, src: Tensor) -> Tensor:
+        src_embedding = self.positional_encoding(self.embedding(src))
+        output = self.transformer_encoder(
+            src=src_embedding,
+        )
+        output = self.activation(self.linear(output)).view(-1, self.token_num)
+        return output
