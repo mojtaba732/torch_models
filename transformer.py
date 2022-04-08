@@ -1,8 +1,9 @@
 import math
 
 import torch
+import torch.nn
 from torch import Tensor
-from torch.nn import (Embedding, Linear, LogSoftmax, Module,
+from torch.nn import (Dropout, Embedding, Linear, LogSoftmax, Module,
                       TransformerEncoder, TransformerEncoderLayer)
 
 
@@ -32,14 +33,14 @@ class TransformerLangModel(Module):
     def __init__(
         self,
         token_num: int,
-        seq_len: int,
+        max_len: int,
         d_model: int = 512,
     ):
         super().__init__()
         self.token_num = token_num
-        self.seq_len = seq_len
+        self.max_len = max_len
         self.embedding = Embedding(token_num, embedding_dim=d_model)
-        self.positional_encoding = PositionalEncoding(d_model=d_model, max_len=seq_len)
+        self.positional_encoding = PositionalEncoding(d_model=d_model, max_len=max_len)
         encoder_layers = TransformerEncoderLayer(
             d_model=d_model, nhead=8, batch_first=True
         )
@@ -56,21 +57,45 @@ class TransformerLangModel(Module):
         return output
 
 
+class PositionalEncoding2(Module):
+    def __init__(self, d_model: int, max_len: int, dropout: float = 0.1):
+        super().__init__()
+        self.dropout = Dropout(p=dropout)
+
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model)
+        )
+        pe = torch.zeros(max_len, 1, d_model)
+        pe[:, 0, 0::2] = torch.sin(position * div_term)
+        pe[:, 0, 1::2] = torch.cos(position * div_term)
+        self.register_buffer("pe", pe)
+
+    def forward(self, x: Tensor) -> Tensor:
+        """
+        Args:
+            x: Tensor, shape [max_len, batch_size, embedding_dim]
+        """
+        x = x + self.pe[: x.size(0)]
+        return self.dropout(x)
+
+
 class TransformerClassificationModel(Module):
     def __init__(
         self,
         token_num: int,
-        seq_len: int,
+        max_len: int,
         num_classes: int,
         d_model: int = 512,
     ):
         super().__init__()
+        self.max_len = max_len
         self.token_num = token_num
-        self.seq_len = seq_len
         self.embedding = Embedding(token_num, embedding_dim=d_model)
-        self.positional_encoding = PositionalEncoding(d_model=d_model, max_len=seq_len)
+        self.positional_encoding = PositionalEncoding2(d_model=d_model, max_len=max_len)
         encoder_layers = TransformerEncoderLayer(
-            d_model=d_model, nhead=8, batch_first=True
+            d_model=d_model,
+            nhead=8,
         )
         self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers=6)
         self.linear = Linear(d_model, num_classes)

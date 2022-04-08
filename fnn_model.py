@@ -7,7 +7,7 @@ class FNNModel(nn.Module):
     def __init__(
         self,
         token_num,
-        seq_len,
+        max_len,
         hidden_dim=None,
         embedding_dim=None,
         use_direct_connection=True,
@@ -15,20 +15,20 @@ class FNNModel(nn.Module):
     ):
         super().__init__()
         self.token_num = token_num
-        self.seq_len = seq_len
+        self.max_len = max_len
         if embedding_dim is None:
             embedding_dim = 30
         self.embedding = nn.Embedding(token_num, embedding_dim=embedding_dim)
         self.use_direct_connection = use_direct_connection
         if self.use_direct_connection:
-            self.direct_connection_fc = nn.Linear(seq_len * embedding_dim, token_num)
+            self.direct_connection_fc = nn.Linear(max_len * embedding_dim, token_num)
         else:
             print("no direct_connection_fc")
 
         if hidden_dim is None:
             hidden_dim = 100
 
-        self.fc2 = nn.Linear(seq_len * embedding_dim, hidden_dim)
+        self.fc2 = nn.Linear(max_len * embedding_dim, hidden_dim)
         self.fc3 = nn.Linear(hidden_dim, token_num)
         # Optionally tie weights as in:
         # "Using the Output Embedding to Improve Language Models" (Press & Wolf 2016)
