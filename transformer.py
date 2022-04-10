@@ -98,13 +98,16 @@ class TransformerClassificationModel(Module):
             nhead=8,
         )
         self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers=6)
-        self.linear = Linear(d_model, num_classes)
-        self.activation = LogSoftmax()
+        if num_classes == 2:
+            self.linear = Linear(d_model, num_classes - 1)
+        else:
+            self.linear = Linear(d_model, num_classes)
 
     def forward(self, src: Tensor) -> Tensor:
         src_embedding = self.positional_encoding(self.embedding(src))
         output = self.transformer_encoder(
             src=src_embedding,
         )
-        output = self.activation(self.linear(output)).view(-1, self.token_num)
-        return output
+        output = output.mean(dim=0)
+        output = self.linear(output)
+        return output.view(-1)
