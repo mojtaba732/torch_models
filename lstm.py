@@ -30,6 +30,9 @@ class SimpleLSTM(nn.Module):
         embeddings = self.embedding(text)
         return self.forward_embedding(embeddings)
 
+    def get_embedding(self, text):
+        return self.embedding(text)
+
     def forward_embedding(self, embeddings):
         embeddings = self.dropout(embeddings)
         _, (hidden, _) = self.rnn(embeddings)
