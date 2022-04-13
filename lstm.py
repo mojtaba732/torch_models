@@ -27,7 +27,11 @@ class SimpleLSTM(nn.Module):
         self.dropout = nn.Dropout()
 
     def forward(self, text):
-        embedded = self.dropout(self.embedding(text))
-        _, (hidden, _) = self.rnn(embedded)
+        embeddings = self.embedding(text)
+        return self.forward_embedding(embeddings)
+
+    def forward_embedding(self, embeddings):
+        embeddings = self.dropout(embeddings)
+        _, (hidden, _) = self.rnn(embeddings)
         hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
         return self.fc(hidden)
