@@ -86,6 +86,8 @@ class TransformerClassificationModel(Module):
         token_num: int,
         max_len: int,
         num_classes: int,
+        nhead: int = 8,
+        num_encoder_layer: int = 6,
         d_model: int = 512,
     ):
         super().__init__()
@@ -95,9 +97,11 @@ class TransformerClassificationModel(Module):
         self.positional_encoding = PositionalEncoding2(d_model=d_model, max_len=max_len)
         encoder_layers = TransformerEncoderLayer(
             d_model=d_model,
-            nhead=8,
+            nhead=nhead,
         )
-        self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers=6)
+        self.transformer_encoder = TransformerEncoder(
+            encoder_layers, num_layers=num_encoder_layer
+        )
         if num_classes == 2:
             self.linear = Linear(d_model, num_classes - 1)
         else:
