@@ -107,8 +107,11 @@ class TransformerClassificationModel(Module):
         else:
             self.linear = Linear(d_model, num_classes)
 
-    def forward(self, src: Tensor) -> Tensor:
-        src_embedding = self.positional_encoding(self.embedding(src))
+    def get_embedding(self, inputs):
+        return self.positional_encoding(self.embedding(inputs))
+
+    def forward(self, inputs: Tensor) -> Tensor:
+        src_embedding = self.get_embedding(inputs)
         output = self.transformer_encoder(
             src=src_embedding,
         )
