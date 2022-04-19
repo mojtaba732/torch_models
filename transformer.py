@@ -58,7 +58,7 @@ class TransformerLangModel(Module):
 
 
 class PositionalEncoding2(Module):
-    def __init__(self, d_model: int, max_len: int, dropout: float = 0.1):
+    def __init__(self, d_model: int, max_len: int, dropout: float = 0):
         super().__init__()
         self.dropout = Dropout(p=dropout)
 
