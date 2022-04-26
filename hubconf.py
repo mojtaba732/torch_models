@@ -1,4 +1,3 @@
-from densenet import DenseNet40
 from dla_simple import SimpleDLA
 from fnn_model import FNNModel
 from lenet import LeNet5
